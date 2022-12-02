@@ -25,7 +25,7 @@ def find3largest(array)
     current_calorie += val.to_i 
   end
 
-  calorie_set.reduce(0) {|sum, num| sum + num}
+  calorie_set.sum
 end
 
 p find3largest(input)
