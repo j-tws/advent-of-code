@@ -60,7 +60,7 @@ const moveStack = () => {
     // PART 1 - USE REVERSE.()
     givenStack[end] = [...givenStack[end], ...movedCrate.reverse()]
     // FOR PART 2 - OMIT REVERSE.()
-    // givenStack[end] = [...givenStack[end], ...movedCrate.reverse()]
+    // givenStack[end] = [...givenStack[end], ...movedCrate]
 
   }
 
@@ -69,7 +69,7 @@ const moveStack = () => {
     let array = givenStack[key]
     lastChar.push(array[array.length - 1])
   }
-  return lastChar
+  return lastChar.join()
 }
 
 console.log(moveStack())
