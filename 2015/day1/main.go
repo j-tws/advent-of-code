@@ -2,25 +2,12 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"strings"
+	"aoc-2015/lib"
 )
 
-func readInput(path string) string {
-	file, err := os.Open(path)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	data, _ := io.ReadAll(file)
-
-	return string(data)
-}
-
 func main() {
-	data := readInput("i.txt")
+	data := lib.ReadInput("i.txt")
 	slice := strings.Split(data, "")
 	sum := 0
 
