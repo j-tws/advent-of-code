@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strconv"
 )
 
 func ReadInput(path string) string {
@@ -16,4 +18,17 @@ func ReadInput(path string) string {
 	data, _ := io.ReadAll(file)
 
 	return string(data)
+}
+
+func SplitLine(input string) []string {
+	return regexp.MustCompile(`\n`).Split(input, -1)
+}
+
+func MapStrToInt(s []string) []int{
+	intSlice := []int{}
+	for _, str := range s {
+		num, _ := strconv.Atoi(str)
+		intSlice = append(intSlice, num)
+	}
+	return intSlice
 }
