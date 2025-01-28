@@ -32,3 +32,13 @@ func MapStrToInt(s []string) []int{
 	}
 	return intSlice
 }
+
+func Map[T any, U any](slice []T, callback func(T) U) []U {
+	newSlice := []U{}
+
+	for _, el := range slice {
+		newSlice = append(newSlice, callback(el))
+	}
+
+	return newSlice
+}
