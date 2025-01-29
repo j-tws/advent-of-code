@@ -42,3 +42,8 @@ func Map[T any, U any](slice []T, callback func(T) U) []U {
 
 	return newSlice
 }
+
+func StrToInt(s string) int {
+	num, _ := strconv.Atoi(s)
+	return num
+}
