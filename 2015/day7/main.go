@@ -7,15 +7,28 @@ import (
 	"strconv"
 )
 
+type mapping struct {
+	Hash map[string]int
+}
+
+func (m mapping) KeysAbsent(keys ...string) bool {
+	for _, key := range keys {
+		_, ok := m.Hash[key]
+		if !ok { return true }
+	}
+	return false
+}
+
 func main(){
-	m := make(map[string]int)
+	m := mapping{
+		Hash: make(map[string]int),
+	}
 	data := lib.ReadInput("i.txt")
 	dataSlice := lib.SplitLine(data)
 	
 	for {
 		for i, line := range dataSlice {
-			ok := parse(line, m)
-			if ok {
+			if parse(line, m) {
 				dataSlice[i] = ""
 			}
 		}
@@ -25,89 +38,78 @@ func main(){
 		}
 	}
 
-	fmt.Println(m["a"])
+	fmt.Println(m.Hash["a"])
 }
 
-func parse(s string, m map[string]int) bool {
-	if hasAnd(s) {
-		re := regexp.MustCompile(" -> | AND ")
-		slice := re.Split(s, -1)
+func parse(s string, m mapping) bool {
+	h := m.Hash
 
-		success := write(m, slice[0], slice[1], slice[2], and)
-		return success
-	} else if hasOr(s) {
+	switch {
+	case hasAnd(s):
+		re := regexp.MustCompile(" -> | AND ")
+	
+		return write(m, re.Split(s, -1), and)
+	case hasOr(s):
 		re := regexp.MustCompile(" -> | OR ")
-		slice := re.Split(s, -1)
-		success := write(m, slice[0], slice[1], slice[2], or)
-		return success
-	} else if hasLShift(s) {
+	
+		return write(m, re.Split(s, -1), or)
+	case hasLShift(s):
 		re := regexp.MustCompile(" -> | LSHIFT ")
-		slice := re.Split(s, -1)
-		success := write(m, slice[0], slice[1], slice[2], lshift)
-		return success
-	} else if hasRShift(s) {
+	
+		return write(m, re.Split(s, -1), lshift)
+	case hasRShift(s):
 		re := regexp.MustCompile(" -> | RSHIFT ")
-		slice := re.Split(s, -1)
-		success := write(m, slice[0], slice[1], slice[2], rshift)
-		return success
-	} else if hasNot(s) {
+	
+		return write(m, re.Split(s, -1), rshift)
+	case hasNot(s):
 		re := regexp.MustCompile(" -> |NOT ")
 		slice := re.Split(s, -1)
 
-		_, ok := m[slice[1]]
-		if !ok { return false }
+		if m.KeysAbsent(slice[1]) { return false }
 
-		m[slice[2]] = not(m[slice[1]])
+		h[slice[2]] = not(h[slice[1]])
 		return true
-	} else {
+	default:
 		re := regexp.MustCompile(" -> ")
 		slice := re.Split(s, -1)
 
 		num, err := strconv.Atoi(slice[0])
 				
 		if err != nil {
-			_, ok := m[slice[0]]
-			if !ok { return false }
+			if m.KeysAbsent(slice[0]) { return false }
 
-			m[slice[1]] = m[slice[0]]
+			h[slice[1]] = h[slice[0]]
 		} else {
-			m[slice[1]] = num
+			h[slice[1]] = num
 		}
 
 		return true
 	}
 }
 
-func keyAbsent(k string, m map[string]int) bool {
-	_, ok := m[k]
-	return !ok
-}
+func write(m mapping, vars []string, operator func(num1, num2 int) int) bool {
+	h := m.Hash
+	s1 := vars[0]
+	s2 := vars[1]
+	s3 := vars[2]
 
-func keysAbsent(k1, k2 string, m map[string]int) bool {
-	_, firstOk := m[k1]
-	_, secondOk := m[k2]
-
-	return !firstOk || !secondOk
-}
-
-func write(m map[string]int, s1, s2, s3 string, operator func(num1, num2 int) int) bool {
 	if onlyDigits(s1) && !onlyDigits(s2) {
-		if keyAbsent(s2, m) { return false }
+		if m.KeysAbsent(s2) { return false }
 		
-		m[s3] = operator(lib.StrToInt(s1), m[s2])
+		h[s3] = operator(lib.StrToInt(s1), h[s2])
 		return true
 	} else if !onlyDigits(s1) && onlyDigits(s2) {
-		if keyAbsent(s1, m) { return false }
+		if m.KeysAbsent(s1) { return false }
 		
-		m[s3] = operator(m[s1], lib.StrToInt(s2))
+		h[s3] = operator(h[s1], lib.StrToInt(s2))
 		return true
 	} else if !onlyDigits(s1) && !onlyDigits(s2) {
-		if keysAbsent(s1, s2, m) { return false }
+		if m.KeysAbsent(s1, s2) { return false }
 
-		m[s3] = operator(m[s1], m[s2])
+		h[s3] = operator(h[s1], h[s2])
 		return true
 	} else {
-		m[s3] = operator(lib.StrToInt(s1), lib.StrToInt(s2))
+		h[s3] = operator(lib.StrToInt(s1), lib.StrToInt(s2))
 		return true
 	}
 }
